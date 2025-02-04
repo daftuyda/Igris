@@ -1,0 +1,15 @@
+<!-- templates/index.html -->
+{% extends "base.html" %}
+{% block content %}
+<div class="system-panel">
+  <h1 class="panel-title">Welcome to Solo Leveling Quests</h1>
+  <p class="panel-text">Track your daily or weekly tasks in a style inspired by Sung Jin-Woo's System.</p>
+
+  {% if user %}
+    <a class="system-button" href="{{ url_for('view_tasks') }}">Go to My Tasks</a>
+  {% else %}
+    <!-- If you have a login route -->
+    <p>Please <a class="system-link" href="{{ url_for('login') }}">log in</a> to manage your quests.</p>
+  {% endif %}
+</div>
+{% endblock %}

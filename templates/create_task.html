@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+{% block content %}
+<h2 class="section-title">Create a New Task</h2>
+<div class="system-panel form-panel">
+  <form method="POST">
+
+    <label class="form-label" for="name">Task Name:</label>
+    <input type="text" id="name" name="name" required class="form-input"/>
+
+    <label class="form-label" for="task_type">Task Type:</label>
+    <select id="task_type" name="task_type" class="form-select">
+      <option value="count">Count</option>
+      <option value="boolean">Yes/No Toggle</option>
+    </select>
+
+    <p class="form-label">Which days of the week?</p>
+    <!-- Monday=0, Tuesday=1, ... Sunday=6 -->
+    <div class="weekdays">
+      <label><input type="checkbox" name="days_of_week" value="0" checked>Mon</label>
+      <label><input type="checkbox" name="days_of_week" value="1" checked>Tue</label>
+      <label><input type="checkbox" name="days_of_week" value="2" checked>Wed</label>
+      <label><input type="checkbox" name="days_of_week" value="3" checked>Thu</label>
+      <label><input type="checkbox" name="days_of_week" value="4" checked>Fri</label>
+      <label><input type="checkbox" name="days_of_week" value="5" checked>Sat</label>
+      <label><input type="checkbox" name="days_of_week" value="6" checked>Sun</label>
+    </div>
+
+    <label class="form-label" for="goal">Goal (for count tasks):</label>
+    <input type="number" id="goal" name="goal" value="1" class="form-input"/>
+
+    <button type="submit" class="system-button">Create Task</button>
+  </form>
+</div>
+{% endblock %}

@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Solo Leveling Quests</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body class="system-body">
+
+  <nav class="system-nav">
+    <!-- Left side -->
+    <div class="nav-left">
+      <a class="nav-title" href="{{ url_for('view_tasks') }}">Solo Leveling Quests</a>
+    </div>
+
+    <!-- Center part of the nav -->
+    <div class="nav-center">
+        {% if user %}
+        <!-- Username in white -->
+        <span class="nav-username">{{ user.username }}</span>
+    
+        <!-- Rank: We'll assign a CSS class based on user rank -->
+        {% set rank = get_rank_for_level(user.level) %}
+        <span class="nav-rank rank-{{ rank }}">{{ rank }}</span>
+        {% endif %}
+    </div>
+
+    <!-- Right side -->
+    <div class="nav-right">
+      {% if user %}
+        <a href="{{ url_for('profile') }}">Profile</a>
+        <a href="{{ url_for('change_password') }}">Change Password</a>
+        <a href="{{ url_for('logout') }}">Logout</a>
+      {% else %}
+        <a href="{{ url_for('login') }}">Login</a>
+        <a href="{{ url_for('register') }}">Register</a>
+      {% endif %}
+    </div>
+  </nav>
+
+  <div class="system-container">
+    {% block content %}{% endblock %}
+  </div>
+
+</body>
+</html>

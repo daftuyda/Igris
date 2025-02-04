@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% block content %}
+<h2 class="section-title">Your Profile</h2>
+<div class="system-panel profile-panel">
+  <p><strong>Username:</strong> {{ user.username }}</p>
+  <p><strong>Level:</strong> {{ user.level }}</p>
+  <p><strong>Rank:</strong> {{ rank }}</p>
+  <p>Timezone: {{ user.timezone }}</p>
+
+  <!-- Timezone Changer Form -->
+  <form action="{{ url_for('change_timezone') }}" method="POST" style="margin-top: 1em;">
+    <label for="new_timezone" class="form-label">Change Timezone:</label>
+    <!-- This could be a text input OR a dropdown of popular zones -->
+    <input type="text" id="new_timezone" name="new_timezone" class="form-input" value="{{ user.timezone }}" />
+    <button type="submit" class="system-button small">Update Timezone</button>
+  </form>
+
+  <hr/>
+
+  <p><strong>XP:</strong> {{ user.xp }}</p>
+  <p>XP This Level: {{ xp_into_level }} / {{ xp_range_for_level }}
+    (to reach next level)
+  </p>
+
+  <div class="progress-bar-container">
+    <div class="progress-bar" style="width: {{ progress_percent }}%;"></div>
+    <div class="progress-bar-text">{{ progress_percent|round(1) }}%</div>
+  </div>
+</div>
+{% endblock %}

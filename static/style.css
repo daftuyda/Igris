@@ -1,0 +1,412 @@
+/* ==============================
+   GLOBAL & BASE STYLING
+   ============================== */
+   /* Import the Lato font from Google Fonts */
+    @import url('https://fonts.googleapis.com/css2?family=Lato:wght@400;700&display=swap');
+
+   * {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+  }
+  
+  /* Body set to dark background with subtle texture or pure black */
+  body, html {
+    margin: 0;
+    padding: 0;
+    font-family: 'Lato', sans-serif; /* Lato is now the default font */
+    background-color: #0B0F16;
+    color: #FFFFFF;
+    height: 100%;
+  }
+  
+  /* This helps give a sense of the "system" interface overlay style. */
+  .system-body {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    background: radial-gradient(ellipse at center, rgba(0,0,0,0.8) 0%, #0B0F16 100%);
+    /* You can also add a subtle background image if you want a faint pattern. */
+  }
+  
+  /* ==============================
+     NAVIGATION
+     ============================== */
+  .system-nav {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background-color: rgba(30, 40, 60, 0.9);
+    /* Glow border */
+    border-bottom: 2px solid #2F3A4F;
+    box-shadow: 0 0 10px rgba(51, 153, 255, 0.2);
+    padding: 10px 20px;
+    position: relative;
+  }
+  
+  /* Left, center, right sections in nav */
+  .nav-left, .nav-center, .nav-right {
+    display: flex;
+    align-items: center;
+  }
+  .nav-left {
+    flex: 1;
+  }
+  .nav-center {
+    flex: 1;
+    justify-content: center;
+  }
+  .nav-right {
+    flex: 1;
+    justify-content: flex-end;
+  }
+  
+  /* Title */
+  .nav-title {
+    font-size: 1.2rem;
+    font-weight: bold;
+    color: #a9f1ff; /* Light aqua */
+    text-shadow: 0 0 8px rgba(169,241,255,0.6);
+  }
+  
+  /* Center username/rank display */
+  .nav-username {
+    font-size: 1.1rem;
+    font-weight: bold;
+    color: #ffffff; /* White */
+    margin-right: 8px;
+  }
+
+  .nav-rank {
+    font-size: 1.1rem;
+    font-weight: bold;
+    /* margin-left: 5px; margin-right: 5px; optional spacing */
+  }
+
+    .rank-E { color: #cccccc; }
+    .rank-D { color: #91d7ff; }
+    .rank-C { color: #6cff74; }
+    .rank-B { color: #c58bff; }
+    .rank-A { color: #ffa45c; }
+    .rank-S { color: #ffd700; }
+  
+  /* Right nav links */
+  .nav-right a {
+    color: #a9f1ff;
+    text-decoration: none;
+    margin-left: 15px;
+    transition: color 0.2s;
+  }
+  .nav-right a:hover {
+    color: #3ee7e5;
+  }
+  
+  /* ==============================
+     MAIN CONTAINER
+     ============================== */
+  .system-container {
+    flex: 1;
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 20px;
+  }
+  
+  /* ==============================
+     HEADINGS & TITLES
+     ============================== */
+  .section-title {
+    color: #a9f1ff;
+    font-size: 1.8rem;
+    margin-bottom: 20px;
+    text-shadow: 0 0 6px rgba(169,241,255,0.5);
+    text-align: center;
+  }
+  .section-body {
+    color: #a9f1ff;
+    font-size: 1rem;
+    margin-bottom: 20px;
+    text-shadow: 0 0 6px rgba(169,241,255,0.5);
+    text-align: center;
+  }
+  
+  /* ==============================
+     SYSTEM PANEL (Basic Box)
+     ============================== */
+     /* Flicker keyframes using the same color */
+     @keyframes randomFlicker {
+        /* We define multiple 'keyframes' at unusual percentages. */
+        0%, 2%, 8%, 13% {
+          box-shadow: 0 0 8px rgba(169, 241, 255, 0.2);
+        }
+        1%, 3%, 7%, 12%, 15% {
+          box-shadow: 0 0 12px rgba(169, 241, 255, 0.3);
+        }
+        14%, 20%, 22% {
+          box-shadow: 0 0 6px rgba(169, 241, 255, 0.1);
+        }
+        25%, 27%, 30% {
+          box-shadow: 0 0 10px rgba(169, 241, 255, 0.3);
+        }
+        35%, 37% {
+          box-shadow: 0 0 14px rgba(169, 241, 255, 0.4);
+        }
+        40%, 45%, 50% {
+          box-shadow: 0 0 5px rgba(169, 241, 255, 0.1);
+        }
+        55%, 57%, 60% {
+          box-shadow: 0 0 12px rgba(169, 241, 255, 0.3);
+        }
+        62%, 66%, 70% {
+          box-shadow: 0 0 8px rgba(169, 241, 255, 0.2);
+        }
+        75%, 78% {
+          box-shadow: 0 0 10px rgba(169, 241, 255, 0.3);
+        }
+        80%, 85% {
+          box-shadow: 0 0 14px rgba(169, 241, 255, 0.5);
+        }
+        88%, 90% {
+          box-shadow: 0 0 6px rgba(169, 241, 255, 0.1);
+        }
+        92%, 95%, 100% {
+          box-shadow: 0 0 8px rgba(169, 241, 255, 0.2);
+        }
+      }
+  
+  /* Example for .system-panel with a neon border flicker */
+  .system-panel {
+    position: relative;
+    background-color: rgba(25,36,56,0.8);
+    padding: 20px;
+    margin-bottom: 20px;
+    border-radius: 6px;
+    backdrop-filter: blur(6px); /* optional frosted effect */
+  }
+  
+  .system-panel::before {
+    content: "";
+    position: absolute;
+    top: -2px; left: -2px; right: -2px; bottom: -2px;
+    border: 2px solid rgba(169, 241, 255, 0.4);
+    border-radius: 8px;
+    pointer-events: none;
+  
+    /* Base glow - you can pick one of the intensities from the keyframes */
+    box-shadow: 0 0 8px rgba(169, 241, 255, 0.6);
+  
+    /* Replace the old flicker with the random flicker */
+    animation: randomFlicker 1.5s infinite;
+  }
+      
+  /* A special style for a "profile panel" or bigger info card */
+  .profile-panel {
+    text-align: left;
+  }
+  
+  /* ==============================
+     BUTTONS & LINKS
+     ============================== */
+  .system-button {
+    display: inline-block;
+    background: linear-gradient(90deg, #0084d8, #3ee7e5);
+    color: #0B0F16;
+    text-decoration: none;
+    padding: 8px 16px;
+    border: none;
+    border-radius: 4px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: filter 0.2s, transform 0.2s;
+    margin-bottom: 0.5em;
+    margin-top: 0.5em;
+  }
+  .system-button:hover {
+    filter: brightness(1.15);
+    transform: translateY(-1px);
+  }
+  
+  /* Smaller variant */
+  .system-button.small {
+    padding: 4px 8px;
+    font-size: 0.9rem;
+  }
+  
+  /* Link style */
+  .system-link {
+    color: #a9f1ff;
+    text-decoration: none;
+    transition: color 0.2s;
+  }
+  .system-link:hover {
+    color: #3ee7e5;
+  }
+  
+  /* ==============================
+     FORMS & LABELS
+     ============================== */
+  .form-panel {
+    max-width: 500px;
+    margin: 0 auto;
+  }
+  /* For labels */
+.form-label {
+    display: block;
+    margin-bottom: 6px;
+    font-weight: bold;
+    color: #a9f1ff; /* or #fff, up to you */
+  }
+  
+  /* For text inputs and selects */
+  .form-input {
+    width: 100%;                  /* or auto if you prefer */
+    padding: 8px;
+    margin-bottom: 10px;
+    border-radius: 4px;
+    border: 1px solid #2F3A4F;    /* same color used elsewhere in your theme */
+    background-color: #1b2437;    /* dark gray/blue background */
+    color: #ffffff;               /* white text */
+    outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s;
+  }
+  
+  /* On hover or focus, add a subtle glow */
+  .form-input:hover {
+    border-color: #3ee7e5;        /* highlight color */
+  }
+  .form-input:focus {
+    border-color: #3ee7e5;        /* highlight color */
+    box-shadow: 0 0 6px rgba(62, 231, 229, 0.3); /* subtle glow effect */
+  }
+  .form-input:focus, .form-select:focus {
+    border-color: #3ee7e5;
+    box-shadow: 0 0 8px rgba(62,231,229,0.3);
+  }
+
+  .form-select {
+    width: 100%;                 /* Match your form's preferred width */
+    padding: 8px;
+    margin-bottom: 10px;
+    border-radius: 4px;
+    border: 1px solid #2F3A4F;   /* Same border color as elsewhere in your theme */
+    background-color: #1b2437;   /* Dark background */
+    color: #ffffff;              /* White text */
+    outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s;
+    appearance: none;            /* Removes default OS arrow in some browsers */
+  }
+  
+  /* Hover effect */
+  .form-select:hover {
+    border-color: #3ee7e5;       /* Light teal highlight */
+  }
+  
+  /* Focus effect: subtle glow */
+  .form-select:focus {
+    border-color: #3ee7e5;
+    box-shadow: 0 0 6px rgba(62, 231, 229, 0.3);
+  }
+  
+  /* ==============================
+     TASK PANELS
+     ============================== */
+  .tasks-container {
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .task-panel {
+    background-color: rgba(27, 36, 56, 0.8);
+    padding: 15px;
+    border-radius: 6px;
+    margin-bottom: 15px;
+    border: 1px solid #2F3A4F;
+    box-shadow: 0 0 5px rgba(62,231,229, 0.1);
+  }
+  .task-panel h3 {
+    margin-bottom: 8px;
+  }
+  
+  /* For tasks not active today or incomplete, you can dim them if you want: */
+  /*
+  .inactive-task {
+    opacity: 0.5;
+  }
+  */
+  
+  /* ==============================
+     PROGRESS BARS
+     ============================== */
+     .progress-bar-container {
+        position: relative;        /* So we can position the text absolutely */
+        background-color: #2F3A4F;
+        border-radius: 4px;
+        height: 24px;              /* A bit taller so the text isn't cut off */
+        margin: 8px 0;
+        overflow: hidden;
+      }
+      
+      /* The bar itself stretches behind the text */
+      .progress-bar {
+        position: absolute;
+        top: 0;
+        left: 0;
+        height: 100%;
+        width: 0%; /* dynamic via inline style or JS */
+        background: linear-gradient(90deg, #0084d8, #3ee7e5);
+        transition: width 0.3s;
+        box-shadow: inset 0 0 10px rgba(62,231,229, 0.4);
+        border-radius: 4px 0 0 4px;
+      }
+      
+      /* Text overlay for the percentage, absolutely centered in container */
+      .progress-bar-text {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        line-height: 24px;      /* match container height */
+        text-align: center;
+        pointer-events: none;   /* so clicks go through to bar if needed */
+        font-weight: bold;
+        color: #fff;            /* or a contrasting color */
+        text-shadow: 0 0 2px rgba(0,0,0,0.5);
+      }
+  
+  /* ==============================
+     HIGHLIGHT TEXT
+     ============================== */
+  .highlight {
+    color: #ffd56b;
+    font-weight: bold;
+  }
+  .done-yes {
+    color: #00e676;
+    font-weight: bold;
+  }
+  .done-no {
+    color: #ff5252;
+    font-weight: bold;
+  }
+  
+  /* ==============================
+     INCREMENT FORM
+     ============================== */
+  .increment-form {
+    display: flex;
+    align-items: center;
+    margin-top: 10px;
+  }
+  .increment-input {
+    width: 60px;
+    margin-right: 10px;
+    background-color: #1b2437;
+    color: #fff;
+    border: 1px solid #2F3A4F;
+    border-radius: 4px;
+    outline: none;
+  }
+  
+  /* ==============================
+     EXTRAS / TRANSITIONS
+     ============================== */

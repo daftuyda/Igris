@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+{% block content %}
+<h2 class="section-title">Edit Task</h2>
+<div class="system-panel form-panel">
+  <form method="POST">
+    <label class="form-label" for="name">Task Name:</label>
+    <input type="text" id="name" name="name" value="{{ task.name }}" required class="form-input"/>
+
+    <label class="form-label" for="task_type">Task Type:</label>
+    <select id="task_type" name="task_type" class="form-select">
+      <option value="count" {% if task.task_type == 'count' %}selected{% endif %}>Count</option>
+      <option value="boolean" {% if task.task_type == 'boolean' %}selected{% endif %}>Yes/No</option>
+    </select>
+
+    <p class="form-label">Which days of the week?</p>
+    {% set current_days = task.get_days_set() %}
+    <div class="weekdays">
+      <label><input type="checkbox" name="days_of_week" value="0" 
+        {% if 0 in current_days %}checked{% endif %}>Mon</label>
+      <label><input type="checkbox" name="days_of_week" value="1" 
+        {% if 1 in current_days %}checked{% endif %}>Tue</label>
+      <label><input type="checkbox" name="days_of_week" value="2" 
+        {% if 2 in current_days %}checked{% endif %}>Wed</label>
+      <label><input type="checkbox" name="days_of_week" value="3" 
+        {% if 3 in current_days %}checked{% endif %}>Thu</label>
+      <label><input type="checkbox" name="days_of_week" value="4" 
+        {% if 4 in current_days %}checked{% endif %}>Fri</label>
+      <label><input type="checkbox" name="days_of_week" value="5" 
+        {% if 5 in current_days %}checked{% endif %}>Sat</label>
+      <label><input type="checkbox" name="days_of_week" value="6" 
+        {% if 6 in current_days %}checked{% endif %}>Sun</label>
+    </div>
+
+    <label class="form-label" for="goal">Goal (for count tasks):</label>
+    <input type="number" id="goal" name="goal" value="{{ task.goal }}" class="form-input"/>
+
+    <button type="submit" class="system-button">Save Changes</button>
+  </form>
+</div>
+{% endblock %}
