@@ -3,7 +3,7 @@
 {% block content %}
 
 <h2 class="section-title">Your Tasks</h2>
-<p class="section-body">{{ completed_count }}/{{ total_tasks }} tasks completed</p>
+<p class="section-body">You have {{ tasks|length }} tasks scheduled today.</p>
 <div class="tasks-container">
 
   <!-- Button to create a new task -->

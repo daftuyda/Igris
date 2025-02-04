@@ -20,13 +20,35 @@
     height: 100%;
   }
   
+  @media (max-width: 768px) {
+    .tasks-container {
+      display: block; /* Instead of flex row, let tasks stack vertically */
+      margin: 0 auto;
+    }
+  
+    .task-panel {
+      margin-bottom: 20px;
+    }
+  
+    .section-title {
+      font-size: 1.4rem;
+    }
+  }
+
   /* This helps give a sense of the "system" interface overlay style. */
   .system-body {
-    min-height: 100vh;
     display: flex;
     flex-direction: column;
-    background: radial-gradient(ellipse at center, rgba(0,0,0,0.8) 0%, #0B0F16 100%);
-    /* You can also add a subtle background image if you want a faint pattern. */
+    min-height: 100vh;
+    background: radial-gradient(ellipse at center, rgba(11,15,22,1) 0%, #0B0F16 100%);
+  }
+  
+  .system-container {
+    flex: 1;
+    width: 100%;
+    max-width: 1200px; /* so it’s not too wide on big screens */
+    margin: 0 auto;
+    padding: 20px;
   }
   
   /* ==============================
@@ -99,16 +121,6 @@
   }
   .nav-right a:hover {
     color: #3ee7e5;
-  }
-  
-  /* ==============================
-     MAIN CONTAINER
-     ============================== */
-  .system-container {
-    flex: 1;
-    max-width: 900px;
-    margin: 0 auto;
-    padding: 20px;
   }
   
   /* ==============================

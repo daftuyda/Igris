@@ -360,23 +360,22 @@ def view_tasks():
     if not user:
         return redirect(url_for("login"))
 
-    # Suppose we just want to show ALL tasks
-    tasks = user.tasks  # or filter if you only want "today"
+    # If you want to respect the user's timezone:
+    import pytz
+    try:
+        user_tz = pytz.timezone(user.timezone)
+    except:
+        user_tz = pytz.timezone("UTC")
 
-    # Calculate how many are completed
-    completed_count = 0
-    total_tasks = len(tasks)
-    for t in tasks:
-        if t.task_type == "count":
-            if t.count >= t.goal:
-                completed_count += 1
-        else:
-            if t.is_done:
-                completed_count += 1
+    # Convert now to local time
+    local_now = datetime.now(user_tz)
+    current_day = local_now.weekday()  # Monday=0..Sunday=6
 
-    return render_template("tasks.html", user=user, tasks=tasks,
-                           completed_count=completed_count,
-                           total_tasks=total_tasks)
+    # Filter tasks that are active today
+    tasks_today = [t for t in user.tasks if current_day in t.get_days_set()]
+
+    # Pass only tasks_today to the template
+    return render_template("tasks.html", user=user, tasks=tasks_today)
 
 @app.route("/create_task", methods=["GET", "POST"])
 def create_task():
