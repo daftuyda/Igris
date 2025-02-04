@@ -43,15 +43,16 @@ class User(db.Model):
 class Task(db.Model):
     __tablename__ = "tasks"
     id = db.Column(db.Integer, primary_key=True)
-
     name = db.Column(db.String(100), nullable=False)
-    task_type = db.Column(db.String(20), default="count")  # "count" or "boolean"
+    task_type = db.Column(db.String(20), default="count")
     days_of_week = db.Column(db.String(50), default="0,1,2,3,4,5,6")
-    difficulty = db.Column(db.Integer, default=1)  # 1–5 => E–S rank difficulty
+    difficulty = db.Column(db.Integer, default=1)
+    goal = db.Column(db.Integer, default=1)
+    count = db.Column(db.Integer, default=0)
+    is_done = db.Column(db.Boolean, default=False)
 
-    goal = db.Column(db.Integer, default=1)  # For count tasks
-    count = db.Column(db.Integer, default=0) # Current progress
-    is_done = db.Column(db.Boolean, default=False) # For boolean tasks
+    # ADD THIS
+    is_one_time = db.Column(db.Boolean, default=False)
 
     user_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False)
 
@@ -168,8 +169,12 @@ def do_daily_evaluation_for_user(user):
 
     # 4. Reset tasks
     for t in todays_tasks:
-        t.count = 0
-        t.is_done = False
+        if t.is_one_time:
+            db.session.delete(t)
+        else:
+            # normal reset
+            t.count = 0
+            t.is_done = False
 
     db.session.commit()
     print(f"[Daily Eval] Completed for user={user.username}, day_of_week={day_of_week}")
@@ -217,9 +222,10 @@ scheduler.start()
 ########################################
 
 def get_current_user():
-    """Return the logged-in user object, or None if not logged in."""
     if "user_id" in session:
-        return User.query.get(session["user_id"])
+        user_id = session["user_id"]
+        user = db.session.get(User, user_id)
+        return user
     return None
 
 @app.context_processor
@@ -392,6 +398,9 @@ def create_task():
         days_str = ",".join(selected_days)
 
         difficulty = int(request.form.get("difficulty", 1))
+        
+        one_time_val = request.form.get("is_one_time", "false")
+        is_one_time = (one_time_val == "true")
 
         new_task = Task(
             name=name,
@@ -399,7 +408,8 @@ def create_task():
             difficulty=difficulty,
             days_of_week=days_str,
             goal=goal,
-            user_id=user.id
+            user_id=user.id,
+            is_one_time=is_one_time
         )
         db.session.add(new_task)
         db.session.commit()
@@ -429,6 +439,9 @@ def edit_task(task_id):
 
         difficulty = int(request.form.get("difficulty", 1))
         task.difficulty = difficulty
+        
+        one_time_val = request.form.get("is_one_time", "false")
+        task.is_one_time = (one_time_val == "true")
 
         # Reset if switching type
         if task.task_type == "count":
@@ -475,8 +488,22 @@ def update_task(task_id):
 
     return redirect(url_for("view_tasks"))
 
+@app.route("/delete_task/<int:task_id>", methods=["POST"])
+def delete_task(task_id):
+    user = get_current_user()
+    if not user:
+        return redirect(url_for("login"))
+
+    task = Task.query.get_or_404(task_id)
+    if task.user_id != user.id:
+        return "Not your task!", 403
+
+    db.session.delete(task)
+    db.session.commit()
+    return redirect(url_for("view_tasks"))
+
 ########################################
 # RUN
 ########################################
 if __name__ == "__main__":
-    app.run(debug=True)
+    app.run(debug=True, port=7000)

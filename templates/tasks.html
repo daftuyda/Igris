@@ -47,6 +47,13 @@
 
       <!-- Edit link -->
       <a class="system-link" href="{{ url_for('edit_task', task_id=task.id) }}">Edit Task</a>
+
+      <form action="{{ url_for('delete_task', task_id=task.id) }}" method="POST"
+        style="display:inline;" onsubmit="return confirm('Delete this task?');">
+    <button type="submit" class="system-button small" style="margin-left: 1em;">
+      Delete
+    </button>
+  </form>
     </div>
   {% endfor %}
 

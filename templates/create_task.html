@@ -14,7 +14,6 @@
     </select>
 
     <p class="form-label">Which days of the week?</p>
-    <!-- Monday=0, Tuesday=1, ... Sunday=6 -->
     <div class="weekdays">
       <label><input type="checkbox" name="days_of_week" value="0" checked>Mon</label>
       <label><input type="checkbox" name="days_of_week" value="1" checked>Tue</label>
@@ -27,6 +26,12 @@
 
     <label class="form-label" for="goal">Goal (for count tasks):</label>
     <input type="number" id="goal" name="goal" value="1" class="form-input"/>
+
+    <label>
+      <input type="checkbox" name="is_one_time" value="true">
+      One-Time Task
+    </label>
+    <br>
 
     <button type="submit" class="system-button">Create Task</button>
   </form>

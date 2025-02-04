@@ -34,6 +34,13 @@
     <label class="form-label" for="goal">Goal (for count tasks):</label>
     <input type="number" id="goal" name="goal" value="{{ task.goal }}" class="form-input"/>
 
+    <label>
+      <input type="checkbox" name="is_one_time" value="true"
+             {% if task.is_one_time %}checked{% endif %}>
+      One-Time Task
+    </label>
+    <br>
+
     <button type="submit" class="system-button">Save Changes</button>
   </form>
 </div>
