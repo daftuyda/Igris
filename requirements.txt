@@ -1,5 +1,5 @@
-Flask==2.3.x
-Flask_SQLAlchemy==3.0.x
-Flask_Bcrypt==1.0.x
-APScheduler==3.9.x
-pytz==2025.x
+Flask
+Flask_SQLAlchemy
+Flask_Bcrypt
+APScheduler
+pytz
