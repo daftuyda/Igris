@@ -6,13 +6,19 @@
   <p><strong>Level:</strong> {{ user.level }}</p>
   <p><strong>Rank:</strong> {{ rank }}</p>
   <p>Timezone: {{ user.timezone }}</p>
-
-  <!-- Timezone Changer Form -->
-  <form action="{{ url_for('change_timezone') }}" method="POST" style="margin-top: 1em;">
-    <label for="new_timezone" class="form-label">Change Timezone:</label>
-    <!-- This could be a text input OR a dropdown of popular zones -->
-    <input type="text" id="new_timezone" name="new_timezone" class="form-input" value="{{ user.timezone }}" />
-    <button type="submit" class="system-button small">Update Timezone</button>
+  
+  <!-- Dropdown to Change Timezone -->
+  <form method="POST" style="margin-top: 10px;">
+    <label class="form-label" for="new_timezone">Change Timezone:</label>
+    <select id="new_timezone" name="new_timezone" class="form-select">
+      {% for tz in timezones %}
+        <option value="{{ tz }}"
+          {% if tz == user.timezone %}selected{% endif %}>
+          {{ tz }}
+        </option>
+      {% endfor %}
+    </select>
+    <button type="submit" class="system-button small">Update</button>
   </form>
 
   <hr/>

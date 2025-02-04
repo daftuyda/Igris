@@ -1,9 +1,16 @@
 <!-- templates/tasks.html -->
 {% extends "base.html" %}
 {% block content %}
+{% set day_map = {"0":"Mo","1":"Tu","2":"We","3":"Th","4":"Fr","5":"Sa","6":"Su"} %}
 
 <h2 class="section-title">Your Tasks</h2>
 <p class="section-body">You have {{ tasks|length }} tasks scheduled today.</p>
+
+<!-- Countdown Display -->
+<div id="countdown-display" style="margin-top: 20px; font-size: 1.2rem; color: #fff;">
+  Time until reset: <span id="countdown-timer"></span>
+</div>
+
 <div class="tasks-container">
 
   <!-- Button to create a new task -->
@@ -14,7 +21,11 @@
   {% for task in tasks %}
     <div class="task-panel">
       <h3>{{ task.name }}</h3>
-      <p>Frequency: <span class="highlight">{{ task.frequency|capitalize }}</span></p>
+      
+      <p>Frequency: <span class="highlight">{% set day_list = task.days_of_week.split(",") %}
+        {% for d in day_list %}
+        {{ day_map[d]|default("") }}
+        {% endfor %}</span></p>
       <!-- <p>Type: <span class="highlight">{{ task.task_type }}</span></p> -->
 
       {% if task.task_type == 'boolean' %}
@@ -34,7 +45,19 @@
 
       {% else %}
         <!-- Count tasks: show progress & update form -->
-        <p>Progress: <span class="highlight">{{ task.count }}</span> / {{ task.goal }}</p>
+        {% if task.task_type == 'count' %}
+        {% if task.count >= task.goal %}
+          <!-- display in green if goal reached -->
+          <p>Progress: 
+            <span class="done-yes">{{ task.count }}/{{ task.goal }}</span>
+          </p>
+        {% else %}
+          <!-- normal color if not done -->
+          <p>Progress: 
+            <span class="done-no">{{ task.count }}/{{ task.goal }}</span>
+          </p>
+        {% endif %}
+        {% endif %}
         <div class="progress-bar-container">
           {% set progress = (task.count / task.goal * 100) if task.goal != 0 else 0 %}
           <div class="progress-bar" style="width: {{ progress }}%"></div>
@@ -43,9 +66,16 @@
           <input type="number" name="amount" value="1" min="1" class="increment-input">
           <button class="system-button small" type="submit">+ Add</button>
         </form>
+        <form action="{{ url_for('update_task', task_id=task.id) }}" method="POST" style="display:inline;">
+          <input type="number" name="amount" value="-1" max="-1" step="-1" class="increment-input">
+          <button type="submit" class="system-button small">
+            - Remove
+          </button>
+        </form>
       {% endif %}
 
       <!-- Edit link -->
+       <br>
       <a class="system-link" href="{{ url_for('edit_task', task_id=task.id) }}">Edit Task</a>
 
       <form action="{{ url_for('delete_task', task_id=task.id) }}" method="POST"
@@ -58,4 +88,40 @@
   {% endfor %}
 
 </div>
+
+<script>
+  // We have next_midnight_local as an ISO string from the server
+  const nextMidnightStr = "{{ next_midnight_local }}";  // e.g. "2025-02-10T00:00:00+11:00"
+
+  // Parse it as a Date
+  const nextMidnightDate = new Date(nextMidnightStr);
+
+  function updateCountdown() {
+    const now = new Date();
+    const diff = nextMidnightDate - now; // in milliseconds
+
+    if (diff <= 0) {
+      // If we're past midnight, maybe show "00:00:00"
+      document.getElementById('countdown-timer').textContent = "00:00:00";
+      return;
+    }
+
+    // Convert diff to hours, minutes, seconds
+    const totalSecs = Math.floor(diff / 1000);
+    const hours = Math.floor(totalSecs / 3600);
+    const mins = Math.floor((totalSecs % 3600) / 60);
+    const secs = totalSecs % 60;
+
+    // Format HH:MM:SS
+    let hh = hours.toString().padStart(2, '0');
+    let mm = mins.toString().padStart(2, '0');
+    let ss = secs.toString().padStart(2, '0');
+
+    document.getElementById('countdown-timer').textContent = `${hh}:${mm}:${ss}`;
+  }
+
+  // Update every second
+  setInterval(updateCountdown, 1000);
+  updateCountdown(); // run once immediately
+</script>
 {% endblock %}

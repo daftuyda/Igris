@@ -1,6 +1,6 @@
 import os
 import math
-from datetime import datetime
+from datetime import datetime, timedelta
 from flask import Flask, render_template, request, redirect, url_for, session
 from flask_sqlalchemy import SQLAlchemy
 from flask_bcrypt import Bcrypt
@@ -316,16 +316,24 @@ def index():
     user = get_current_user()
     return render_template("index.html", user=user)
 
-@app.route("/profile")
+@app.route("/profile", methods=["GET", "POST"])
 def profile():
     """Show user's XP, Level, Rank, progress to next level, etc."""
     user = get_current_user()
     if not user:
         return redirect(url_for("login"))
+    
+    timezones=pytz.common_timezones
 
     user_rank = get_rank_for_level(user.level)
     current_level_xp = xp_needed_for_level(user.level)      # XP needed to get to user's current level
     next_level_xp = xp_needed_for_level(user.level + 1)     # XP needed for the next level
+
+    if request.method == "POST":
+        new_tz = request.form.get("new_timezone", "UTC").strip()
+        user.timezone = new_tz
+        db.session.commit()
+        return redirect(url_for("profile"))
 
     # e.g., progress from "start of this level" to "next level"
     xp_into_level = user.xp - current_level_xp  
@@ -342,7 +350,8 @@ def profile():
     return render_template("profile.html", user=user, rank=user_rank, 
                            progress_percent=progress_percent,
                            xp_into_level=xp_into_level,
-                           xp_range_for_level=xp_range_for_level)
+                           xp_range_for_level=xp_range_for_level,
+                           timezones=timezones,)
 
 @app.route("/change_timezone", methods=["POST"])
 def change_timezone():
@@ -366,22 +375,26 @@ def view_tasks():
     if not user:
         return redirect(url_for("login"))
 
-    # If you want to respect the user's timezone:
-    import pytz
+    # Determine local time for the user
     try:
         user_tz = pytz.timezone(user.timezone)
     except:
         user_tz = pytz.timezone("UTC")
 
-    # Convert now to local time
     local_now = datetime.now(user_tz)
-    current_day = local_now.weekday()  # Monday=0..Sunday=6
 
-    # Filter tasks that are active today
-    tasks_today = [t for t in user.tasks if current_day in t.get_days_set()]
+    # next midnight = take today's date in local time + 1 day, set time to 00:00
+    # if it's not already past midnight. Here's an approach:
+    tomorrow = local_now + timedelta(days=1)
+    next_midnight_local = tomorrow.replace(hour=0, minute=0, second=0, microsecond=0)
 
-    # Pass only tasks_today to the template
-    return render_template("tasks.html", user=user, tasks=tasks_today)
+    # pass tasks logic if you only want today’s tasks, etc.
+    tasks_today = [t for t in user.tasks if local_now.weekday() in t.get_days_set()]
+
+    return render_template("tasks.html",
+                           user=user,
+                           tasks=tasks_today,
+                           next_midnight_local=next_midnight_local.isoformat())
 
 @app.route("/create_task", methods=["GET", "POST"])
 def create_task():
@@ -473,7 +486,6 @@ def toggle_task(task_id):
 
 @app.route("/update_task/<int:task_id>", methods=["POST"])
 def update_task(task_id):
-    """Increment a count-based task's progress, award XP."""
     user = get_current_user()
     if not user:
         return redirect(url_for("login"))
@@ -483,9 +495,16 @@ def update_task(task_id):
         return "That is not your task.", 403
 
     amount = int(request.form["amount"])
-    task.count += amount
+    
+    # new logic: if adding negative
+    # we can ensure it doesn't go below zero (if you want)
+    new_count = task.count + amount
+    if new_count < 0:
+        new_count = 0  # or block it entirely?
+    
+    task.count = new_count
     db.session.commit()
-
+    
     return redirect(url_for("view_tasks"))
 
 @app.route("/delete_task/<int:task_id>", methods=["POST"])
