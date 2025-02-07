@@ -20,7 +20,7 @@
 
   {% for task in tasks %}
     <div class="task-panel">
-      <h3>{{ task.name }}</h3>
+      <h3>{{ task.name }} <span class="highlight">+{{ task.xp_reward }} XP</span></h3>
       
       <p>Frequency: <span class="highlight">{% set day_list = task.days_of_week.split(",") %}
         {% for d in day_list %}

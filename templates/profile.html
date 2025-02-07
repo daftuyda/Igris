@@ -3,6 +3,7 @@
 <h2 class="section-title">Your Profile</h2>
 <div class="system-panel profile-panel">
   <p><strong>Username:</strong> {{ user.username }}</p>
+  <p><strong>Streak:</strong> {{ user.streak }} days</p>
   <p><strong>Level:</strong> {{ user.level }}</p>
   <p><strong>Rank:</strong> {{ rank }}</p>
   <p>Timezone: {{ user.timezone }}</p>
@@ -32,5 +33,29 @@
     <div class="progress-bar" style="width: {{ progress_percent }}%;"></div>
     <div class="progress-bar-text">{{ progress_percent|round(1) }}%</div>
   </div>
+</div>
+
+<div class="system-panel xp-log-panel">
+  <h3>Yesterday's XP Log</h3>
+  {% if xp_logs_yesterday|length == 0 %}
+    <p>No XP changes were logged yesterday.</p>
+  {% else %}
+    <table style="text-align: center;margin: auto;">
+      <thead>
+        <tr>
+          <th class="highlight">Amount</th>
+          <th class="highlight">Reason</th>
+        </tr>
+      </thead>
+      <tbody>
+      {% for entry in xp_logs_yesterday %}
+        <tr>
+          <td class="label">{{ entry.amount }}</td>
+          <td class="label">{{ entry.reason }}</td>
+        </tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  {% endif %}
 </div>
 {% endblock %}

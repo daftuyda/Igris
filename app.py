@@ -14,6 +14,10 @@ app = Flask(__name__)
 app.secret_key = "YOUR_SECRET_KEY"  # Replace with a secure, random key
 
 # Database config
+app.config["SECRET_KEY"] = "some-secret"
+app.config["PERMANENT_SESSION_LIFETIME"] = timedelta(days=7)
+
+# Database config
 app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///database.db"
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 
@@ -37,6 +41,8 @@ class User(db.Model):
 
     xp = db.Column(db.Integer, default=0)      # total XP
     level = db.Column(db.Integer, default=1)   # user's level
+    
+    streak = db.Column(db.Integer, default=0)  # consecutive days of completing all tasks
 
     tasks = db.relationship("Task", backref="user", lazy=True)
 
@@ -46,7 +52,7 @@ class Task(db.Model):
     name = db.Column(db.String(100), nullable=False)
     task_type = db.Column(db.String(20), default="count")
     days_of_week = db.Column(db.String(50), default="0,1,2,3,4,5,6")
-    difficulty = db.Column(db.Integer, default=1)
+    difficulty = db.Column(db.Integer, default=3)
     goal = db.Column(db.Integer, default=1)
     count = db.Column(db.Integer, default=0)
     is_done = db.Column(db.Boolean, default=False)
@@ -123,6 +129,18 @@ def update_user_level(user):
 INCOMPLETE_TASK_PENALTY = 5  # XP penalty per difficulty if not done
 # Or define a separate bonus if you want for "all tasks done"
 
+class XpLog(db.Model):
+    __tablename__ = "xp_log"
+    id = db.Column(db.Integer, primary_key=True)
+
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+    amount = db.Column(db.Integer, nullable=False)  # e.g. +10, -5, etc.
+    reason = db.Column(db.String(255), nullable=False)  # e.g. "Completed Task: Push-ups"
+    timestamp = db.Column(db.DateTime, default=datetime.utcnow)
+
+    # Relationship to user if you want
+    user = db.relationship("User", backref="xp_logs")
+
 def is_task_completed(task):
     """Check if a task meets completion criteria."""
     if task.task_type == "count":
@@ -151,19 +169,35 @@ def do_daily_evaluation_for_user(user):
     # 3. Award or penalize
     for t in todays_tasks:
         if is_task_completed(t):
-            # Example awarding logic:
-            if t.task_type == "count":
-                # award = difficulty * goal
-                xp_gain = t.difficulty * t.goal
-                user.xp += xp_gain
-            else:
-                # boolean => difficulty * 10
-                xp_gain = t.difficulty * 10
-                user.xp += xp_gain
+            xp_gain = t.difficulty * t.goal if t.task_type=='count' else t.difficulty * 10
+            user.xp += xp_gain
+
+            db.session.add(XpLog(
+                user_id=user.id,
+                amount=xp_gain,
+                reason=f"Task Completed: {t.name}"  # store the task name
+            ))
         else:
-            # not completed => penalty
-            penalty = t.difficulty * INCOMPLETE_TASK_PENALTY
+            penalty = t.difficulty * 5
             user.xp = max(0, user.xp - penalty)
+            db.session.add(XpLog(
+                user_id=user.id,
+                amount=-penalty,
+                reason=f"Incomplete Task: {t.name}"
+            ))
+            
+    all_completed = all(is_task_completed(t) for t in todays_tasks)
+    if all_completed:
+        user.streak += 1
+        bonus_xp = 20
+        user.xp += bonus_xp
+        db.session.add(XpLog(
+            user_id=user.id,
+            amount=bonus_xp,
+            reason="Daily Bonus for Completing All Tasks"
+        ))
+    else:
+        user.streak = 0
 
     update_user_level(user)
 
@@ -188,7 +222,7 @@ def daily_check_for_all_users():
      - Update user.last_reset_date
     """
     with app.app_context():
-        now_utc = datetime.utcnow()
+        now_utc = datetime.now(datetime.UTC)
         all_users = User.query.all()
 
         for user in all_users:
@@ -271,6 +305,7 @@ def login():
         user = User.query.filter_by(username=username).first()
         if user and bcrypt.check_password_hash(user.password_hash, password):
             session["user_id"] = user.id
+            session.permanent = True
             return redirect(url_for("view_tasks"))
         else:
             return "Invalid username or password. <a href='/login'>Try again</a>"
@@ -316,6 +351,18 @@ def index():
     user = get_current_user()
     return render_template("index.html", user=user)
 
+@app.template_filter("local_time")
+def local_time_filter(dt, timezone_str):
+    import pytz
+    if not dt:
+        return ""
+    try:
+        tz = pytz.timezone(timezone_str)
+    except:
+        tz = pytz.utc
+    local_dt = dt.astimezone(tz)
+    return local_dt.strftime("%Y-%m-%d %H:%M:%S")
+
 @app.route("/profile", methods=["GET", "POST"])
 def profile():
     """Show user's XP, Level, Rank, progress to next level, etc."""
@@ -324,6 +371,32 @@ def profile():
         return redirect(url_for("login"))
     
     timezones=pytz.common_timezones
+    
+    try:
+        user_tz = pytz.timezone(user.timezone)
+    except:
+        user_tz = pytz.timezone("UTC")
+
+    local_now = datetime.now(user_tz)
+    
+    yesterday_local = local_now - timedelta(days=0)
+    
+    y_midnight_start = yesterday_local.replace(hour=0, minute=0, second=0, microsecond=0)
+    
+    y_midnight_end = y_midnight_start + timedelta(days=1)
+    
+    start_utc = y_midnight_start.astimezone(pytz.utc)
+    end_utc = y_midnight_end.astimezone(pytz.utc)
+    
+    xp_logs_yesterday = XpLog.query.filter(
+        XpLog.user_id == user.id,
+        XpLog.timestamp >= start_utc,
+        XpLog.timestamp < end_utc
+    ).order_by(XpLog.timestamp).all()
+    
+    total_gained = sum(e.amount for e in xp_logs_yesterday if e.amount > 0)
+    total_lost = sum(-e.amount for e in xp_logs_yesterday if e.amount < 0)
+    net_xp = total_gained - total_lost
 
     user_rank = get_rank_for_level(user.level)
     current_level_xp = xp_needed_for_level(user.level)      # XP needed to get to user's current level
@@ -351,7 +424,8 @@ def profile():
                            progress_percent=progress_percent,
                            xp_into_level=xp_into_level,
                            xp_range_for_level=xp_range_for_level,
-                           timezones=timezones,)
+                           timezones=timezones,
+                           xp_logs_yesterday=xp_logs_yesterday,)
 
 @app.route("/change_timezone", methods=["POST"])
 def change_timezone():
@@ -374,6 +448,14 @@ def view_tasks():
     user = get_current_user()
     if not user:
         return redirect(url_for("login"))
+    
+    def xp_for_task(t):
+        if t.task_type == "count":
+            return t.difficulty * t.goal
+        elif t.task_type == "boolean":
+            return t.difficulty * 10
+        else:
+            return 
 
     # Determine local time for the user
     try:
@@ -390,6 +472,9 @@ def view_tasks():
 
     # pass tasks logic if you only want today’s tasks, etc.
     tasks_today = [t for t in user.tasks if local_now.weekday() in t.get_days_set()]
+    
+    for t in tasks_today:
+        t.xp_reward = xp_for_task(t)
 
     return render_template("tasks.html",
                            user=user,
@@ -521,8 +606,21 @@ def delete_task(task_id):
     db.session.commit()
     return redirect(url_for("view_tasks"))
 
+# @app.route("/force_xp_update", methods=["POST"])
+# def force_xp_update():
+#     user = get_current_user()
+#     if not user:
+#         return "Not logged in", 403
+
+#     # CAUTION: In a real app, you might want admin-only checks or environment checks
+#     do_daily_evaluation_for_user(user)  # or whichever awarding function
+
+#     return redirect(url_for("profile"))
+
 ########################################
 # RUN
 ########################################
 if __name__ == "__main__":
+    with app.app_context():
+        db.create_all() # Create tables if they don't exist
     app.run(debug=True, port=7000)
