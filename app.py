@@ -222,7 +222,7 @@ def daily_check_for_all_users():
      - Update user.last_reset_date
     """
     with app.app_context():
-        now_utc = datetime.now(datetime.UTC)
+        now_utc = datetime.now(timezone.utc)
         all_users = User.query.all()
 
         for user in all_users:
